@@ -1,12 +1,14 @@
 import threading
+import asyncio
 import time
+import tempfile
 import re
 import socket
 import requests
 import traceback
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 import uvicorn
 from pathlib import Path
 from dotenv import load_dotenv
@@ -43,7 +45,8 @@ except ImportError as e:
     def ai_agent_act(cmd, path): return {"action": "finish", "reply": "Chưa cấu hình AI Router"}
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = Path(__file__).resolve().parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 WEBHOOK_URL = "https://discord.com/api/webhooks/1542506873381584967/sILWQjZsBi9PySZje-VCsDRHFmcYHwPqgfruSzspY2wrWL3_J02i6WBHqJJw0s3TDZvr"
 
@@ -134,6 +137,51 @@ def run_smart_agent_web(user_command):
         steps_log.append(f"Lỗi Agent: {e}")
             
     return " -> ".join(steps_log) if steps_log else "Đã hoàn thành tác vụ tự động hóa."
+
+
+# =========================
+# WEB TTS - GIỌNG VIỆT
+# =========================
+TTS_VOICE = "vi-VN-HoaiMyNeural"
+
+@app.get("/api/tts")
+async def web_tts(text: str):
+    """Tạo MP3 giọng Việt để trình duyệt phát."""
+    text = (text or "").strip()
+    if not text:
+        return {"error": "Nội dung TTS trống."}
+
+    try:
+        import edge_tts
+    except ImportError:
+        return {
+            "error": "Chưa cài edge-tts. Chạy: python -m pip install edge-tts"
+        }
+
+    temp_dir = Path(tempfile.gettempdir()) / "zero_web_tts"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+
+    filename = f"zero_{int(time.time() * 1000)}.mp3"
+    output = temp_dir / filename
+
+    try:
+        communicate = edge_tts.Communicate(
+            text=text,
+            voice=TTS_VOICE,
+            rate="+0%",
+            volume="+0%",
+        )
+        await communicate.save(str(output))
+
+        return FileResponse(
+            path=str(output),
+            media_type="audio/mpeg",
+            filename=filename,
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    except Exception as e:
+        print(f"❌ Lỗi Web TTS: {e}")
+        return {"error": f"Lỗi tạo âm thanh: {e}"}
 
 @app.get("/", response_class=HTMLResponse)
 async def read_index(request: Request):
@@ -272,5 +320,12 @@ async def handle_command(request: Request):
         return {"reply": f"Lỗi hệ thống: {str(e)}"}
 
 if __name__ == "__main__":
-    print("🚀 Khởi chạy Web Server đầy đủ tính năng tại: http://192.168.1.6:8000")
-    uvicorn.run(app, host="192.168.1.6", port=8000)
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        server_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        server_ip = "127.0.0.1"
+    print(f"🚀 Khởi chạy Web Server đầy đủ tính năng tại: http://{server_ip}:8000")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
