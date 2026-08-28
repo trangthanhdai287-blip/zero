@@ -1,0 +1,1 @@
+# Khai báo gói core cho trợ lý Android

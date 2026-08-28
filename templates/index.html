@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trợ lý ảo Zero - Web Voice</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .chat-container { width: 100%; max-width: 600px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        #chat-box { height: 400px; border: 1px solid #ddd; border-radius: 8px; padding: 15px; overflow-y: scroll; background: #fafafa; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .message { padding: 10px 14px; border-radius: 8px; max-width: 80%; line-height: 1.4; word-break: break-word; }
+        .user-msg { background: #0084ff; color: white; align-self: flex-end; }
+        .bot-msg { background: #e4e6eb; color: #050505; align-self: flex-start; }
+        .input-group { display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 16px; }
+        button { padding: 12px 20px; border: none; border-radius: 8px; background: #0084ff; color: white; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #006dd9; }
+        #mic-btn { background: #e4e6eb; color: #333; font-size: 20px; padding: 10px 15px; }
+        #mic-btn.listening { background: #ff4d4d; color: white; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <h2>🤖 Trợ lý Zero (Web Voice)</h2>
+    <div id="chat-box">
+        <div class="message bot-msg">Chào bạn, tôi là Zero. Bạn có thể gõ phím hoặc bấm nút Micro để nói chuyện với tôi!</div>
+    </div>
+    
+    <div class="input-group">
+        <button id="mic-btn" title="Nói chuyện với Zero" onclick="toggleSpeechRecognition()">🎤</button>
+        <input type="text" id="command-input" placeholder="Nhập lệnh hoặc bấm micro để nói..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendCommand()">Gửi</button>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById("chat-box");
+    const commandInput = document.getElementById("command-input");
+    const micBtn = document.getElementById("mic-btn");
+
+    function appendMessage(sender, text) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `message ${sender === 'Bạn' ? 'user-msg' : 'bot-msg'}`;
+        msgDiv.innerText = `${sender}: ${text}`;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function speakText(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 1.1;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    async function sendCommand() {
+        const cmd = commandInput.value.trim();
+        if (!cmd) return;
+
+        appendMessage("Bạn", cmd);
+        commandInput.value = "";
+
+        try {
+            const response = await fetch('/api/command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: cmd })
+            });
+            const data = await response.json();
+            appendMessage("Zero", data.reply);
+            speakText(data.reply);
+        } catch (error) {
+            const errReply = "Lỗi kết nối tới máy chủ Web.";
+            appendMessage("Zero", errReply);
+            speakText(errReply);
+        }
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === "Enter") {
+            sendCommand();
+        }
+    }
+
+    let recognition = null;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'vi-VN';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = function() {
+            micBtn.classList.add("listening");
+            micBtn.innerText = "🛑";
+        };
+
+        recognition.onresult = function(event) {
+            const speechToText = event.results[0][0].transcript;
+            commandInput.value = speechToText;
+            sendCommand();
+        };
+
+        recognition.onerror = function(event) {
+            console.log("Lỗi micro: ", event.error);
+            stopMic();
+        };
+
+        recognition.onend = function() {
+            stopMic();
+        };
+    } else {
+        micBtn.style.display = "none";
+    }
+
+    function toggleSpeechRecognition() {
+        if (!recognition) {
+            alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Hãy dùng Google Chrome!");
+            return;
+        }
+        try {
+            recognition.start();
+        } catch (e) {
+            recognition.stop();
+        }
+    }
+
+    function stopMic() {
+        micBtn.classList.remove("listening");
+        micBtn.innerText = "🎤";
+    }
+</script>
+
+</body>
+</html>
