@@ -1,7 +1,0 @@
-python-dotenv
-sounddevice
-numpy
-SpeechRecognition
-edge-tts
-pygame-ce
-google-generativeai
