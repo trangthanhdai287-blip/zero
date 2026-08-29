@@ -1,4 +1,4 @@
-import threading
+import os
 import asyncio
 import time
 import tempfile
@@ -7,14 +7,14 @@ import socket
 import requests
 import traceback
 import sys
-import os
 import webbrowser
-from fastapi import FastAPI, Request
+import threading
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse
 import uvicorn
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 
 def resource_path(relative_path):
     """Hàm hỗ trợ lấy đường dẫn chính xác khi chạy ở dạng file .exe hoặc script thông thường"""
@@ -201,6 +201,50 @@ async def web_tts(text: str):
         print(f"❌ Lỗi Web TTS: {e}")
         return {"error": f"Lỗi tạo âm thanh: {e}"}
 
+
+# =========================
+# API QUẢN LÝ API KEY (.env)
+# =========================
+from pydantic import BaseModel
+
+class KeySaveRequest(BaseModel):
+    api_key: str
+    key_name: str = "GEMINI_API_KEY"
+
+@app.post("/api/save-key")
+async def save_api_key(data: KeySaveRequest):
+    """API nhận API Key từ giao diện và tự động ghi/cập nhật vào file .env"""
+    try:
+        env_path = Path(".env")
+        set_key(dotenv_path=env_path, key_to_set=data.key_name, value_to_set=data.api_key)
+        
+        os.environ[data.key_name] = data.api_key
+        
+        return {"success": True, "message": f"Đã lưu {data.key_name} vào file .env thành công!"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/api/get-key")
+async def get_api_key(key_name: str = "GEMINI_API_KEY"):
+    """API lấy hoặc kiểm tra key từ biến môi trường"""
+    val = os.getenv(key_name, "")
+    if not val:
+        for alternative in ["GEMINI_API_KEY", "OPENAI_API_KEY", "API_KEY"]:
+            val = os.getenv(alternative, "")
+            if val:
+                key_name = alternative
+                break
+                
+    if not val:
+        return {"success": False, "error": "Không tìm thấy API Key trong cấu hình (.env)"}
+    
+    return {
+        "success": True,
+        "key_name": key_name,
+        "api_key": val
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def read_index(request: Request):
     return templates.TemplateResponse(request, "index.html")
@@ -287,9 +331,9 @@ async def handle_command(request: Request):
                 agent_type(text_to_type)
                 reply_msg = f"Đã nhập văn bản: {text_to_type}"
 
-        # 7. Gọi AI Router cho các lệnh phức tạp hoặc trò chuyện
+        # 7. Chuyển toàn bộ các yêu cầu còn lại sang AI Router (`gemini-3.6-flash`) để phân tích và trò chuyện[cite: 2]
         else:
-            ai_result = ai_route_command(cmd_lower)
+            ai_result = ai_route_command(cmd)
             if ai_result and isinstance(ai_result, dict):
                 action = ai_result.get("action")
                 app_query = ai_result.get("app_query")
@@ -317,8 +361,8 @@ async def handle_command(request: Request):
                 elif action == "agent_task":
                     agent_result = run_smart_agent_web(cmd)
                     reply_msg = f"Hoàn tất Agent: {agent_result}"
-                elif action == "chat" and reply:
-                    reply_msg = reply
+                elif action == "chat":
+                    reply_msg = reply if reply else "Xin chào! Mình là trợ lý Zero."
             
             if not reply_msg:
                 reply_msg = "Tôi chưa rõ yêu cầu này trên web."
