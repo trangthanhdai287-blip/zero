@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -180,7 +179,7 @@ body{
 
 
 /* =========================================================
-   VOICE TOGGLE
+   VOICE & ACTION TOGGLE
 ========================================================= */
 
 .voice-toggle{
@@ -199,6 +198,9 @@ body{
     font-size:17px;
 
     transition:.15s;
+
+    display: grid;
+    place-items: center;
 }
 
 
@@ -823,6 +825,16 @@ button{
 
         Web Server đang hoạt động
 
+        <!-- 🔑 NÚT CẬP NHẬT VÀ LƯU API KEY VÀO FILE .ENV -->
+        <button
+            id="getKeyBtn"
+            class="voice-toggle"
+            type="button"
+            title="Nhập và lưu API Key vào file .env"
+        >
+            🔑
+        </button>
+
         <!-- 🔊 BẬT/TẮT GIỌNG -->
         <button
             id="voiceToggle"
@@ -898,6 +910,13 @@ button{
             data-text="Kiểm tra bộ nhớ điện thoại"
         >
             💾 Bộ nhớ
+        </button>
+
+        <button
+            class="chip"
+            data-text="Kiểm tra API Key"
+        >
+            🔑 Kiểm tra API Key
         </button>
 
 
@@ -1036,6 +1055,9 @@ const voiceToggle =
 
 const micBtn =
     document.getElementById("micBtn");
+
+const getKeyBtn =
+    document.getElementById("getKeyBtn");
 
 
 /* =========================================================
@@ -1395,6 +1417,57 @@ voiceToggle.addEventListener(
 
     }
 );
+
+
+/* =========================================================
+   SAVE KEY BUTTON (GHI VÀ LƯU TRỰC TIẾP VÀO FILE .ENV)
+========================================================= */
+
+if(getKeyBtn){
+    getKeyBtn.addEventListener(
+        "click",
+        async () => {
+            const userKey = prompt("Nhập API Key mới của bạn (Gemini / OpenAI):");
+            if(!userKey || !userKey.trim()){
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/save-key", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        api_key: userKey.trim(),
+                        key_name: "GEMINI_API_KEY"
+                    })
+                });
+
+                const data = await response.json();
+
+                if(data.success){
+                    addMessage(
+                        "zero",
+                        "🔑 Đã cập nhật và lưu API Key mới vào file .env thành công!"
+                    );
+                    speak("Đã lưu API Key vào hệ thống.");
+                } else {
+                    addMessage(
+                        "zero",
+                        `❌ Không thể lưu API Key: ${data.error || "Lỗi không xác định"}`
+                    );
+                }
+            } catch (error) {
+                console.error("Lỗi kết nối:", error);
+                addMessage(
+                    "zero",
+                    "❌ Không thể kết nối tới server để lưu API Key."
+                );
+            }
+        }
+    );
+}
 
 
 /* =========================================================
@@ -2198,4 +2271,3 @@ input.focus();
 
 </body>
 </html>
-```
