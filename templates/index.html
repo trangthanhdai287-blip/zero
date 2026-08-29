@@ -1,0 +1,2201 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Zero Assistant</title>
+
+<style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*{
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#0b1020;
+    --panel:#11182b;
+    --panel2:#18223a;
+    --text:#eef3ff;
+    --muted:#8e9ab5;
+    --accent:#5b8cff;
+    --accent2:#7c5cff;
+    --border:rgba(255,255,255,.08);
+    --user:#2456c7;
+    --zero:#18233b;
+}
+
+
+/* =========================================================
+   BODY
+========================================================= */
+
+body{
+    margin:0;
+    min-height:100vh;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(91,140,255,.18),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(124,92,255,.15),
+            transparent 30%
+        ),
+        var(--bg);
+
+    color:var(--text);
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    display:flex;
+    justify-content:center;
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app{
+    width:min(1050px,100%);
+    height:100vh;
+
+    display:flex;
+    flex-direction:column;
+
+    padding:14px;
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar{
+    min-height:68px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:12px 16px;
+
+    border:
+        1px solid
+        var(--border);
+
+    background:
+        rgba(17,24,43,.86);
+
+    backdrop-filter:
+        blur(18px);
+
+    border-radius:
+        18px
+        18px
+        10px
+        10px;
+}
+
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+
+.logo{
+    width:44px;
+    height:44px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent2)
+        );
+
+    box-shadow:
+        0 8px 28px
+        rgba(91,140,255,.25);
+
+    font-size:23px;
+}
+
+
+.title{
+    font-weight:800;
+    font-size:19px;
+}
+
+
+.subtitle{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:3px;
+}
+
+
+.status{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    color:#aeb9d2;
+    font-size:13px;
+}
+
+
+.dot{
+    width:9px;
+    height:9px;
+
+    border-radius:50%;
+
+    background:#52d273;
+
+    box-shadow:
+        0 0 12px
+        rgba(82,210,115,.8);
+}
+
+
+/* =========================================================
+   VOICE TOGGLE
+========================================================= */
+
+.voice-toggle{
+    width:38px;
+    height:34px;
+
+    border-radius:10px;
+
+    background:
+        rgba(255,255,255,.07);
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    font-size:17px;
+
+    transition:.15s;
+}
+
+
+.voice-toggle:hover{
+    background:
+        rgba(255,255,255,.14);
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+.chat{
+    flex:1;
+
+    overflow-y:auto;
+
+    padding:20px 8px;
+
+    scrollbar-width:thin;
+}
+
+
+/* =========================================================
+   WELCOME
+========================================================= */
+
+.welcome{
+    max-width:720px;
+
+    margin:
+        5vh auto
+        25px;
+
+    text-align:center;
+}
+
+
+.welcome h1{
+    margin:
+        0
+        0
+        8px;
+
+    font-size:
+        clamp(
+            28px,
+            5vw,
+            44px
+        );
+}
+
+
+.welcome p{
+    color:var(--muted);
+
+    margin:
+        0
+        auto
+        20px;
+
+    line-height:1.6;
+}
+
+
+/* =========================================================
+   CHIPS
+========================================================= */
+
+.chips{
+    display:flex;
+
+    gap:9px;
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+}
+
+
+.chip{
+    border:
+        1px solid
+        var(--border);
+
+    background:
+        rgba(24,34,58,.8);
+
+    color:#cbd5ed;
+
+    border-radius:999px;
+
+    padding:
+        9px
+        13px;
+
+    cursor:pointer;
+
+    transition:.15s;
+}
+
+
+.chip:hover{
+    border-color:
+        rgba(91,140,255,.6);
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.message{
+    display:flex;
+
+    margin:
+        13px
+        auto;
+
+    max-width:860px;
+
+    gap:10px;
+
+    animation:
+        appear
+        .18s
+        ease-out;
+}
+
+
+.message.user{
+    justify-content:flex-end;
+}
+
+
+.avatar{
+    width:34px;
+    height:34px;
+
+    flex:
+        0 0
+        34px;
+
+    border-radius:11px;
+
+    display:grid;
+    place-items:center;
+
+    background:
+        var(--panel2);
+
+    border:
+        1px solid
+        var(--border);
+}
+
+
+.message.user .avatar{
+    order:2;
+}
+
+
+.bubble{
+    max-width:
+        min(
+            75%,
+            720px
+        );
+
+    padding:
+        12px
+        15px;
+
+    line-height:1.55;
+
+    white-space:pre-wrap;
+
+    overflow-wrap:anywhere;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:17px;
+}
+
+
+.message.zero .bubble{
+    background:
+        var(--zero);
+
+    border-top-left-radius:5px;
+}
+
+
+.message.user .bubble{
+    background:
+        linear-gradient(
+            135deg,
+            var(--user),
+            #4b5fe0
+        );
+
+    border-top-right-radius:5px;
+}
+
+
+/* =========================================================
+   TYPING
+========================================================= */
+
+.typing{
+    display:none;
+
+    max-width:860px;
+
+    margin:
+        0
+        auto
+        10px;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    align-items:center;
+
+    gap:8px;
+}
+
+
+.typing.show{
+    display:flex;
+}
+
+
+.dots span{
+    display:inline-block;
+
+    width:5px;
+    height:5px;
+
+    margin:
+        0
+        2px;
+
+    background:#9caad0;
+
+    border-radius:50%;
+
+    animation:
+        blink
+        1.2s
+        infinite;
+}
+
+
+.dots span:nth-child(2){
+    animation-delay:.15s;
+}
+
+
+.dots span:nth-child(3){
+    animation-delay:.3s;
+}
+
+
+/* =========================================================
+   COMPOSER
+========================================================= */
+
+.composer-wrap{
+    padding:
+        10px
+        0
+        0;
+}
+
+
+.composer{
+    display:flex;
+
+    gap:9px;
+
+    align-items:flex-end;
+
+    max-width:860px;
+
+    margin:auto;
+
+    padding:9px;
+
+    background:
+        rgba(17,24,43,.92);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:18px;
+
+    box-shadow:
+        0 12px 45px
+        rgba(0,0,0,.22);
+}
+
+
+textarea{
+    flex:1;
+
+    resize:none;
+
+    max-height:140px;
+
+    min-height:43px;
+
+    border:0;
+
+    outline:0;
+
+    background:transparent;
+
+    color:var(--text);
+
+    font:inherit;
+
+    padding:
+        10px
+        8px;
+}
+
+
+textarea::placeholder{
+    color:#71809e;
+}
+
+
+button{
+    border:0;
+
+    color:white;
+
+    cursor:pointer;
+
+    font:inherit;
+}
+
+
+/* =========================================================
+   SEND BUTTON
+========================================================= */
+
+.send{
+    width:44px;
+    height:44px;
+
+    flex:
+        0 0
+        44px;
+
+    border-radius:13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent2)
+        );
+
+    font-size:19px;
+
+    transition:.15s;
+}
+
+
+.send:hover{
+    transform:
+        translateY(-1px);
+}
+
+
+.send:disabled{
+    opacity:.45;
+
+    cursor:not-allowed;
+
+    transform:none;
+}
+
+
+/* =========================================================
+   MICROPHONE BUTTON
+========================================================= */
+
+.mic{
+    width:44px;
+    height:44px;
+
+    flex:
+        0 0
+        44px;
+
+    border-radius:13px;
+
+    background:
+        rgba(255,255,255,.08);
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    font-size:19px;
+
+    transition:
+        .15s ease;
+}
+
+
+.mic:hover{
+    background:
+        rgba(255,255,255,.15);
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* Đang nghe */
+
+.mic.listening{
+    background:#e53935;
+
+    box-shadow:
+        0 0 20px
+        rgba(229,57,53,.55);
+
+    animation:
+        micPulse
+        1s
+        infinite;
+}
+
+
+.mic:disabled{
+    opacity:.5;
+
+    cursor:not-allowed;
+}
+
+
+@keyframes micPulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.08);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
+}
+
+
+/* =========================================================
+   BOTTOM
+========================================================= */
+
+.bottom{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    max-width:860px;
+
+    margin:
+        8px
+        auto
+        0;
+
+    color:#687694;
+
+    font-size:11px;
+}
+
+
+.clear{
+    background:transparent;
+
+    color:#8e9ab5;
+
+    padding:
+        4px
+        6px;
+}
+
+
+.clear:hover{
+    color:white;
+}
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes appear{
+
+    from{
+        opacity:0;
+
+        transform:
+            translateY(4px);
+    }
+
+    to{
+        opacity:1;
+
+        transform:none;
+    }
+
+}
+
+
+@keyframes blink{
+
+    0%,80%,100%{
+        opacity:.25;
+    }
+
+    40%{
+        opacity:1;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:650px){
+
+    .app{
+        padding:7px;
+    }
+
+
+    .topbar{
+        border-radius:15px;
+    }
+
+
+    .bubble{
+        max-width:84%;
+    }
+
+
+    .welcome{
+        margin-top:8vh;
+    }
+
+
+    .status{
+        display:none;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+<!-- =======================================================
+     TOP BAR
+======================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="logo">
+            🤖
+        </div>
+
+        <div>
+
+            <div class="title">
+                ZERO Assistant
+            </div>
+
+            <div class="subtitle">
+                Trợ lý AI điều khiển điện thoại
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="status">
+
+        <span class="dot"></span>
+
+        Web Server đang hoạt động
+
+        <!-- 🔊 BẬT/TẮT GIỌNG -->
+        <button
+            id="voiceToggle"
+            class="voice-toggle"
+            type="button"
+            title="Bật/tắt giọng nói"
+        >
+            🔊
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =======================================================
+     CHAT
+======================================================= -->
+
+<main
+    id="chat"
+    class="chat"
+>
+
+
+<section
+    id="welcome"
+    class="welcome"
+>
+
+    <h1>
+        Xin chào! 👋
+    </h1>
+
+
+    <p>
+        Mình là Zero.
+        Bạn có thể trò chuyện hoặc
+        ra lệnh điều khiển điện thoại
+        ngay tại đây.
+    </p>
+
+
+    <div class="chips">
+
+
+        <button
+            class="chip"
+            data-text="Xin chào Zero!"
+        >
+            💬 Trò chuyện
+        </button>
+
+
+        <button
+            class="chip"
+            data-text="Pin điện thoại còn bao nhiêu phần trăm?"
+        >
+            🔋 Kiểm tra pin
+        </button>
+
+
+        <button
+            class="chip"
+            data-text="Mở YouTube"
+        >
+            📱 Mở YouTube
+        </button>
+
+
+        <button
+            class="chip"
+            data-text="Kiểm tra bộ nhớ điện thoại"
+        >
+            💾 Bộ nhớ
+        </button>
+
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+<!-- =======================================================
+     TYPING
+======================================================= -->
+
+<div
+    id="typing"
+    class="typing"
+>
+
+    <span>
+        🤖 Zero đang xử lý
+    </span>
+
+
+    <span class="dots">
+
+        <span></span>
+        <span></span>
+        <span></span>
+
+    </span>
+
+</div>
+
+
+<!-- =======================================================
+     COMPOSER
+======================================================= -->
+
+<section class="composer-wrap">
+
+
+<form
+    id="form"
+    class="composer"
+>
+
+
+    <textarea
+        id="input"
+        rows="1"
+        placeholder="Nhắn tin hoặc ra lệnh cho Zero..."
+        autocomplete="off"
+    ></textarea>
+
+
+    <!-- 🎤 MICRO -->
+    <button
+        id="micBtn"
+        class="mic"
+        type="button"
+        title="Bấm để nói lệnh"
+    >
+        🎤
+    </button>
+
+
+    <!-- ➤ GỬI -->
+    <button
+        id="send"
+        class="send"
+        type="submit"
+        title="Gửi"
+    >
+        ➤
+    </button>
+
+
+</form>
+
+
+<div class="bottom">
+
+    <span>
+        Enter để gửi · Shift + Enter để xuống dòng · 🎤 Nói lệnh
+    </span>
+
+
+    <button
+        id="clear"
+        class="clear"
+        type="button"
+    >
+        Xóa cuộc trò chuyện
+    </button>
+
+</div>
+
+
+</section>
+
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const chat =
+    document.getElementById("chat");
+
+const input =
+    document.getElementById("input");
+
+const form =
+    document.getElementById("form");
+
+const send =
+    document.getElementById("send");
+
+const typing =
+    document.getElementById("typing");
+
+const welcome =
+    document.getElementById("welcome");
+
+const clearBtn =
+    document.getElementById("clear");
+
+const voiceToggle =
+    document.getElementById("voiceToggle");
+
+const micBtn =
+    document.getElementById("micBtn");
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+const STORAGE_KEY =
+    "zero_web_chat_v1";
+
+const VOICE_KEY =
+    "zero_voice_enabled";
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+let history =
+    JSON.parse(
+        localStorage.getItem(
+            STORAGE_KEY
+        ) || "[]"
+    );
+
+
+/* =========================================================
+   VOICE
+========================================================= */
+
+let voiceEnabled =
+    localStorage.getItem(
+        VOICE_KEY
+    ) !== "false";
+
+
+let currentAudio = null;
+
+
+/* =========================================================
+   UPDATE VOICE BUTTON
+========================================================= */
+
+function updateVoiceButton(){
+
+    if(!voiceToggle){
+        return;
+    }
+
+
+    voiceToggle.textContent =
+        voiceEnabled
+            ? "🔊"
+            : "🔇";
+
+
+    voiceToggle.title =
+        voiceEnabled
+            ? "Tắt giọng nói"
+            : "Bật giọng nói";
+
+}
+
+
+updateVoiceButton();
+
+
+/* =========================================================
+   STOP AUDIO
+========================================================= */
+
+function stopAudio(){
+
+    if(!currentAudio){
+        return;
+    }
+
+
+    try{
+
+        currentAudio.pause();
+
+        currentAudio.currentTime = 0;
+
+    }
+    catch(error){
+
+        console.warn(
+            "Không thể dừng audio:",
+            error
+        );
+
+    }
+
+
+    currentAudio = null;
+
+}
+
+
+/* =========================================================
+   TTS
+========================================================= */
+
+async function speak(text){
+
+    if(
+        !voiceEnabled ||
+        !text ||
+        !text.trim()
+    ){
+
+        return;
+    }
+
+
+    try{
+
+        stopAudio();
+
+
+        console.log(
+            "🔊 Zero TTS:",
+            text
+        );
+
+
+        const response =
+            await fetch(
+                "/api/tts?text=" +
+                encodeURIComponent(
+                    text
+                ) +
+                "&t=" +
+                Date.now(),
+                {
+                    method:"GET",
+                    cache:"no-store"
+                }
+            );
+
+
+        console.log(
+            "🔊 TTS HTTP:",
+            response.status
+        );
+
+
+        if(!response.ok){
+
+            let errorText = "";
+
+            try{
+
+                errorText =
+                    await response.text();
+
+            }
+            catch(e){}
+
+
+            throw new Error(
+                "TTS HTTP " +
+                response.status +
+                " " +
+                errorText
+            );
+
+        }
+
+
+        const contentType =
+            response.headers.get(
+                "content-type"
+            ) || "";
+
+
+        console.log(
+            "🔊 TTS Content-Type:",
+            contentType
+        );
+
+
+        if(
+            !contentType
+                .toLowerCase()
+                .includes("audio")
+        ){
+
+            const serverText =
+                await response.text();
+
+
+            throw new Error(
+                "Server không trả audio: " +
+                serverText
+            );
+
+        }
+
+
+        const blob =
+            await response.blob();
+
+
+        console.log(
+            "🔊 Audio size:",
+            blob.size,
+            "bytes"
+        );
+
+
+        if(!blob.size){
+
+            throw new Error(
+                "File MP3 rỗng."
+            );
+
+        }
+
+
+        const audioUrl =
+            URL.createObjectURL(
+                blob
+            );
+
+
+        const audio =
+            new Audio();
+
+
+        audio.src =
+            audioUrl;
+
+
+        audio.volume =
+            1.0;
+
+
+        audio.preload =
+            "auto";
+
+
+        currentAudio =
+            audio;
+
+
+        audio.addEventListener(
+            "ended",
+            () => {
+
+                URL.revokeObjectURL(
+                    audioUrl
+                );
+
+
+                if(
+                    currentAudio ===
+                    audio
+                ){
+
+                    currentAudio =
+                        null;
+
+                }
+
+            }
+        );
+
+
+        audio.addEventListener(
+            "error",
+            event => {
+
+                console.error(
+                    "❌ Audio error:",
+                    event
+                );
+
+
+                URL.revokeObjectURL(
+                    audioUrl
+                );
+
+
+                if(
+                    currentAudio ===
+                    audio
+                ){
+
+                    currentAudio =
+                        null;
+
+                }
+
+            }
+        );
+
+
+        await audio.play();
+
+
+        console.log(
+            "✅ Zero đang phát âm thanh"
+        );
+
+
+    }
+    catch(error){
+
+        console.error(
+            "❌ Không phát được TTS:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   VOICE TOGGLE
+========================================================= */
+
+voiceToggle.addEventListener(
+    "click",
+    async () => {
+
+
+        voiceEnabled =
+            !voiceEnabled;
+
+
+        localStorage.setItem(
+            VOICE_KEY,
+            voiceEnabled
+                ? "true"
+                : "false"
+        );
+
+
+        updateVoiceButton();
+
+
+        if(!voiceEnabled){
+
+            stopAudio();
+
+            return;
+
+        }
+
+
+        // Test giọng
+        await speak(
+            "Xin chào! Zero đã bật giọng nói."
+        );
+
+    }
+);
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+function scrollBottom(){
+
+    requestAnimationFrame(
+        () => {
+
+            chat.scrollTop =
+                chat.scrollHeight;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ADD MESSAGE
+========================================================= */
+
+function addMessage(
+    role,
+    text,
+    save = true,
+    speakMessage = false
+){
+
+    if(welcome){
+
+        welcome.style.display =
+            "none";
+
+    }
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "message " +
+        (
+            role === "user"
+                ? "user"
+                : "zero"
+        );
+
+
+    const avatar =
+        document.createElement(
+            "div"
+        );
+
+
+    avatar.className =
+        "avatar";
+
+
+    avatar.textContent =
+        role === "user"
+            ? "👤"
+            : "🤖";
+
+
+    const bubble =
+        document.createElement(
+            "div"
+        );
+
+
+    bubble.className =
+        "bubble";
+
+
+    bubble.textContent =
+        text;
+
+
+    row.appendChild(
+        avatar
+    );
+
+
+    row.appendChild(
+        bubble
+    );
+
+
+    chat.appendChild(
+        row
+    );
+
+
+    /* Lưu lịch sử */
+
+    if(save){
+
+        history.push({
+
+            role:role,
+
+            text:text
+
+        });
+
+
+        if(
+            history.length >
+            100
+        ){
+
+            history =
+                history.slice(
+                    -100
+                );
+
+        }
+
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+                history
+            )
+        );
+
+    }
+
+
+    scrollBottom();
+
+
+    /* 🔊 Đọc câu trả lời */
+
+    if(
+        speakMessage &&
+        role === "zero" &&
+        voiceEnabled
+    ){
+
+        speak(text);
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER HISTORY
+========================================================= */
+
+function renderHistory(){
+
+    if(!history.length){
+
+        return;
+
+    }
+
+
+    if(welcome){
+
+        welcome.style.display =
+            "none";
+
+    }
+
+
+    history.forEach(
+        message => {
+
+            addMessage(
+                message.role,
+                message.text,
+                false,
+                false
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SEND MESSAGE
+========================================================= */
+
+async function sendMessage(
+    message
+){
+
+    message =
+        message.trim();
+
+
+    if(
+        !message ||
+        send.disabled
+    ){
+
+        return;
+
+    }
+
+
+    /* Hiện tin nhắn */
+
+    addMessage(
+        "user",
+        message
+    );
+
+
+    input.value =
+        "";
+
+
+    autoResize();
+
+
+    send.disabled =
+        true;
+
+
+    typing.classList.add(
+        "show"
+    );
+
+
+    scrollBottom();
+
+
+    try{
+
+        console.log(
+            "📤 Gửi lệnh:",
+            message
+        );
+
+
+        const response =
+            await fetch(
+                "/api/command",
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            command:
+                                message
+                        })
+                }
+            );
+
+
+        let data;
+
+
+        try{
+
+            data =
+                await response.json();
+
+        }
+        catch(e){
+
+            throw new Error(
+                "Server trả về dữ liệu không hợp lệ."
+            );
+
+        }
+
+
+        if(!response.ok){
+
+            throw new Error(
+                data.reply ||
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const reply =
+            data.reply ||
+            "Zero không có phản hồi.";
+
+
+        console.log(
+            "📥 Zero:",
+            reply
+        );
+
+
+        /* Hiện + đọc */
+
+        addMessage(
+            "zero",
+            reply,
+            true,
+            true
+        );
+
+
+    }
+    catch(error){
+
+        console.error(
+            "❌ Lỗi gửi lệnh:",
+            error
+        );
+
+
+        addMessage(
+            "zero",
+            "❌ Không thể kết nối tới Zero: " +
+            error.message
+        );
+
+    }
+    finally{
+
+        send.disabled =
+            false;
+
+
+        typing.classList.remove(
+            "show"
+        );
+
+
+        input.focus();
+
+    }
+
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+form.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+
+        sendMessage(
+            input.value
+        );
+
+    }
+);
+
+
+/* =========================================================
+   ENTER
+========================================================= */
+
+input.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "Enter" &&
+            !event.shiftKey
+        ){
+
+            event.preventDefault();
+
+
+            form.requestSubmit();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   TEXTAREA RESIZE
+========================================================= */
+
+function autoResize(){
+
+    input.style.height =
+        "auto";
+
+
+    input.style.height =
+        Math.min(
+            input.scrollHeight,
+            140
+        ) +
+        "px";
+
+}
+
+
+input.addEventListener(
+    "input",
+    autoResize
+);
+
+
+/* =========================================================
+   QUICK COMMAND BUTTONS
+========================================================= */
+
+document
+    .querySelectorAll(".chip")
+    .forEach(
+        chip => {
+
+            chip.addEventListener(
+                "click",
+                () => {
+
+                    sendMessage(
+                        chip.dataset.text
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   CLEAR CHAT
+========================================================= */
+
+clearBtn.addEventListener(
+    "click",
+    () => {
+
+        stopAudio();
+
+
+        history = [];
+
+
+        localStorage.removeItem(
+            STORAGE_KEY
+        );
+
+
+        chat.innerHTML =
+            "";
+
+
+        if(welcome){
+
+            chat.appendChild(
+                welcome
+            );
+
+
+            welcome.style.display =
+                "block";
+
+        }
+
+
+        input.focus();
+
+    }
+);
+
+
+/* =========================================================
+   🎤 SPEECH RECOGNITION
+========================================================= */
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+let recognition = null;
+
+let isListening = false;
+
+
+if(SpeechRecognition){
+
+    recognition =
+        new SpeechRecognition();
+
+
+    /* Tiếng Việt */
+
+    recognition.lang =
+        "vi-VN";
+
+
+    /* Chỉ lấy kết quả hoàn chỉnh */
+
+    recognition.interimResults =
+        false;
+
+
+    /* Một lần nói */
+
+    recognition.continuous =
+        false;
+
+
+    recognition.maxAlternatives =
+        1;
+
+
+    /* ==========================================
+       BẤM MICRO
+    ========================================== */
+
+    micBtn.addEventListener(
+        "click",
+        () => {
+
+            if(isListening){
+
+                recognition.stop();
+
+                return;
+
+            }
+
+
+            try{
+
+                recognition.start();
+
+            }
+            catch(error){
+
+                console.error(
+                    "❌ Không thể bật microphone:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    /* ==========================================
+       BẮT ĐẦU NGHE
+    ========================================== */
+
+    recognition.onstart =
+        () => {
+
+            isListening =
+                true;
+
+
+            micBtn.classList.add(
+                "listening"
+            );
+
+
+            micBtn.textContent =
+                "🔴";
+
+
+            micBtn.title =
+                "Đang nghe... Bấm để dừng";
+
+
+            console.log(
+                "🎤 Zero đang nghe..."
+            );
+
+        };
+
+
+    /* ==========================================
+       NHẬN GIỌNG NÓI
+    ========================================== */
+
+    recognition.onresult =
+        event => {
+
+            const result =
+                event.results[
+                    event.results.length - 1
+                ];
+
+
+            if(!result){
+
+                return;
+
+            }
+
+
+            const text =
+                result[0]
+                    .transcript
+                    .trim();
+
+
+            console.log(
+                "🎤 Zero nghe:",
+                text
+            );
+
+
+            if(!text){
+
+                return;
+
+            }
+
+
+            /* Đưa vào ô nhập */
+
+            input.value =
+                text;
+
+
+            autoResize();
+
+
+            /* Tự gửi */
+
+            sendMessage(
+                text
+            );
+
+        };
+
+
+    /* ==========================================
+       KẾT THÚC NGHE
+    ========================================== */
+
+    recognition.onend =
+        () => {
+
+            isListening =
+                false;
+
+
+            micBtn.classList.remove(
+                "listening"
+            );
+
+
+            micBtn.textContent =
+                "🎤";
+
+
+            micBtn.title =
+                "Bấm để nói lệnh";
+
+
+            console.log(
+                "🎤 Đã dừng nghe."
+            );
+
+        };
+
+
+    /* ==========================================
+       LỖI MICRO
+    ========================================== */
+
+    recognition.onerror =
+        event => {
+
+            console.error(
+                "❌ Speech Recognition:",
+                event.error
+            );
+
+
+            isListening =
+                false;
+
+
+            micBtn.classList.remove(
+                "listening"
+            );
+
+
+            micBtn.textContent =
+                "🎤";
+
+
+            micBtn.title =
+                "Bấm để nói lệnh";
+
+
+            if(
+                event.error ===
+                "not-allowed"
+            ){
+
+                addMessage(
+                    "zero",
+                    "❌ Trình duyệt chưa được cấp quyền microphone. Hãy cho phép Microphone trong trình duyệt."
+                );
+
+            }
+
+
+            else if(
+                event.error ===
+                "no-speech"
+            ){
+
+                console.log(
+                    "🎤 Không nghe thấy giọng nói."
+                );
+
+            }
+
+
+            else if(
+                event.error ===
+                "audio-capture"
+            ){
+
+                addMessage(
+                    "zero",
+                    "❌ Không tìm thấy microphone trên máy."
+                );
+
+            }
+
+
+            else{
+
+                console.warn(
+                    "⚠️ Speech error:",
+                    event.error
+                );
+
+            }
+
+        };
+
+}
+
+
+/* =========================================================
+   TRÌNH DUYỆT KHÔNG HỖ TRỢ SPEECH RECOGNITION
+========================================================= */
+
+else{
+
+    micBtn.disabled =
+        true;
+
+
+    micBtn.textContent =
+        "🚫";
+
+
+    micBtn.title =
+        "Trình duyệt không hỗ trợ nhận giọng nói";
+
+
+    console.warn(
+        "⚠️ Trình duyệt không hỗ trợ Speech Recognition."
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+renderHistory();
+
+updateVoiceButton();
+
+input.focus();
+
+</script>
+
+</body>
+</html>
+```
