@@ -6,6 +6,9 @@ import re
 import socket
 import requests
 import traceback
+import sys
+import os
+import webbrowser
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse
@@ -13,8 +16,16 @@ import uvicorn
 from pathlib import Path
 from dotenv import load_dotenv
 
+def resource_path(relative_path):
+    """Hàm hỗ trợ lấy đường dẫn chính xác khi chạy ở dạng file .exe hoặc script thông thường"""
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 # Tự động tìm và nạp file .env ở thư mục gốc
-env_path = Path(__file__).resolve().parent / '.env'
+env_path = Path(resource_path('.env'))
 load_dotenv(dotenv_path=env_path)
 load_dotenv()
 
@@ -45,7 +56,7 @@ except ImportError as e:
     def ai_agent_act(cmd, path): return {"action": "finish", "reply": "Chưa cấu hình AI Router"}
 
 app = FastAPI()
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(resource_path(""))
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 WEBHOOK_URL = "https://discord.com/api/webhooks/1542506873381584967/sILWQjZsBi9PySZje-VCsDRHFmcYHwPqgfruSzspY2wrWL3_J02i6WBHqJJw0s3TDZvr"
@@ -77,6 +88,13 @@ def send_server_ip():
 def background_init():
     print("🔄 Đang kết nối thiết bị và quét ứng dụng ngầm...")
     send_server_ip()
+    
+    # Tự động mở trình duyệt mặc định đến giao diện web
+    try:
+        webbrowser.open("http://127.0.0.1:8000")
+    except Exception as e:
+        print(f"⚠️ Không thể tự động mở trình duyệt: {e}")
+
     try:
         if check_device():
             init_app_scanner()
