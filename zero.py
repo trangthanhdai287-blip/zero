@@ -16,6 +16,16 @@ import uvicorn
 from pathlib import Path
 from dotenv import load_dotenv, set_key
 
+# Xác định thư mục chứa file .exe hoặc script hiện tại để file .env luôn nằm cùng cấp
+if getattr(sys, 'frozen', False):
+    CONFIG_DIR = Path(sys.executable).parent
+else:
+    CONFIG_DIR = Path(__file__).parent
+
+env_path = CONFIG_DIR / '.env'
+load_dotenv(dotenv_path=env_path)
+load_dotenv()
+
 def resource_path(relative_path):
     """Hàm hỗ trợ lấy đường dẫn chính xác khi chạy ở dạng file .exe hoặc script thông thường"""
     try:
@@ -23,11 +33,6 @@ def resource_path(relative_path):
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
-
-# Tự động tìm và nạp file .env ở thư mục gốc
-env_path = Path(resource_path('.env'))
-load_dotenv(dotenv_path=env_path)
-load_dotenv()
 
 # Import an toàn các module cốt lõi của Zero với cơ chế dự phòng (fallback)
 try:
@@ -213,9 +218,8 @@ class KeySaveRequest(BaseModel):
 
 @app.post("/api/save-key")
 async def save_api_key(data: KeySaveRequest):
-    """API nhận API Key từ giao diện và tự động ghi/cập nhật vào file .env"""
+    """API nhận API Key từ giao diện và tự động ghi/cập nhật vào file .env ngang hàng với file exe"""
     try:
-        env_path = Path(".env")
         set_key(dotenv_path=env_path, key_to_set=data.key_name, value_to_set=data.api_key)
         
         os.environ[data.key_name] = data.api_key
@@ -389,5 +393,6 @@ if __name__ == "__main__":
         s.close()
     except Exception:
         server_ip = "127.0.0.1"
+    
     print(f"🚀 Khởi chạy Web Server đầy đủ tính năng tại: http://{server_ip}:8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_config=None, use_colors=False)
