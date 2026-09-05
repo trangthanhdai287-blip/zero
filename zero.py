@@ -14,7 +14,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse
 import uvicorn
 from pathlib import Path
-from dotenv import load_dotenv, set_key
+from dotenv import load_dotenv, set_key, dotenv_values
 
 # Xác định thư mục chứa file .exe hoặc script hiện tại để file .env luôn nằm cùng cấp
 if getattr(sys, 'frozen', False):
@@ -221,32 +221,35 @@ async def save_api_key(data: KeySaveRequest):
     """API nhận API Key từ giao diện và tự động ghi/cập nhật vào file .env ngang hàng với file exe"""
     try:
         set_key(dotenv_path=env_path, key_to_set=data.key_name, value_to_set=data.api_key)
-        
         os.environ[data.key_name] = data.api_key
-        
         return {"success": True, "message": f"Đã lưu {data.key_name} vào file .env thành công!"}
     except Exception as e:
         return {"success": False, "error": str(e)}
 
 @app.get("/api/get-key")
 async def get_api_key(key_name: str = "GEMINI_API_KEY"):
-    """API lấy hoặc kiểm tra key từ biến môi trường"""
-    val = os.getenv(key_name, "")
-    if not val:
-        for alternative in ["GEMINI_API_KEY", "OPENAI_API_KEY", "API_KEY"]:
-            val = os.getenv(alternative, "")
-            if val:
-                key_name = alternative
-                break
-                
-    if not val:
-        return {"success": False, "error": "Không tìm thấy API Key trong cấu hình (.env)"}
-    
-    return {
-        "success": True,
-        "key_name": key_name,
-        "api_key": val
-    }
+    """API đọc trực tiếp API Key từ file .env ở thư mục gốc"""
+    try:
+        config = dotenv_values(env_path)
+        val = config.get(key_name, "").strip()
+        
+        if not val:
+            for alternative in ["GEMINI_API_KEY", "OPENAI_API_KEY", "API_KEY"]:
+                val = config.get(alternative, "").strip() or os.getenv(alternative, "").strip()
+                if val:
+                    key_name = alternative
+                    break
+                    
+        if not val:
+            return {"success": False, "error": f"Không tìm thấy API Key trong file .env tại đường dẫn: {env_path}"}
+        
+        return {
+            "success": True,
+            "key_name": key_name,
+            "api_key": val
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -335,7 +338,7 @@ async def handle_command(request: Request):
                 agent_type(text_to_type)
                 reply_msg = f"Đã nhập văn bản: {text_to_type}"
 
-        # 7. Chuyển toàn bộ các yêu cầu còn lại sang AI Router (`gemini-3.6-flash`) để phân tích và trò chuyện[cite: 2]
+        # 7. Chuyển toàn bộ các yêu cầu còn lại sang AI Router để phân tích và trò chuyện
         else:
             ai_result = ai_route_command(cmd)
             if ai_result and isinstance(ai_result, dict):
@@ -393,6 +396,5 @@ if __name__ == "__main__":
         s.close()
     except Exception:
         server_ip = "127.0.0.1"
-    
     print(f"🚀 Khởi chạy Web Server đầy đủ tính năng tại: http://{server_ip}:8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_config=None, use_colors=False)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
